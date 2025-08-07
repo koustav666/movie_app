@@ -9,10 +9,7 @@ import '../widgets/movie_reviews_widget.dart';
 class MovieDetailsScreen extends StatefulWidget {
   final Movie movie;
 
-  const MovieDetailsScreen({
-    super.key,
-    required this.movie,
-  });
+  const MovieDetailsScreen({super.key, required this.movie});
 
   @override
   State<MovieDetailsScreen> createState() => _MovieDetailsScreenState();
@@ -49,14 +46,22 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
             actions: [
               Consumer<MovieProvider>(
                 builder: (context, movieProvider, child) {
+                  
+                  final currentMovie = movieProvider.getMovieById(
+                    widget.movie.id,
+                  );
+
+                  final movieToDisplay = currentMovie ?? widget.movie;
+
                   return IconButton(
                     icon: Icon(
-                      widget.movie.isBookmarked
+                      movieToDisplay.isBookmarked
                           ? Icons.bookmark
                           : Icons.bookmark_border,
-                      color: widget.movie.isBookmarked
-                          ? Theme.of(context).colorScheme.primary
-                          : Colors.white,
+                      color:
+                          movieToDisplay.isBookmarked
+                              ? Theme.of(context).colorScheme.primary
+                              : Colors.white,
                     ),
                     onPressed: () {
                       movieProvider.toggleBookmark(widget.movie.id);
@@ -78,27 +83,27 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   // Backdrop Image
                   widget.movie.backdropPath != null
                       ? Image.network(
-                          widget.movie.backdropUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.grey[800],
-                              child: const Icon(
-                                Icons.movie,
-                                color: Colors.white54,
-                                size: 100,
-                              ),
-                            );
-                          },
-                        )
+                        widget.movie.backdropUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[800],
+                            child: const Icon(
+                              Icons.movie,
+                              color: Colors.white54,
+                              size: 100,
+                            ),
+                          );
+                        },
+                      )
                       : Container(
-                          color: Colors.grey[800],
-                          child: const Icon(
-                            Icons.movie,
-                            color: Colors.white54,
-                            size: 100,
-                          ),
+                        color: Colors.grey[800],
+                        child: const Icon(
+                          Icons.movie,
+                          color: Colors.white54,
+                          size: 100,
                         ),
+                      ),
                   // Gradient Overlay
                   Container(
                     decoration: BoxDecoration(
@@ -210,8 +215,12 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     const SizedBox(height: 24),
                   ],
                   // Additional Info
-                  _buildInfoRow('Popularity', widget.movie.popularity.toStringAsFixed(1)),
-                  if (widget.movie.genres != null && widget.movie.genres!.isNotEmpty)
+                  _buildInfoRow(
+                    'Popularity',
+                    widget.movie.popularity.toStringAsFixed(1),
+                  ),
+                  if (widget.movie.genres != null &&
+                      widget.movie.genres!.isNotEmpty)
                     _buildInfoRow('Genres', widget.movie.genres!.join(', ')),
                   const SizedBox(height: 24),
                   // Reviews Section
@@ -221,7 +230,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         reviews: movieProvider.movieReviews,
                         isLoading: movieProvider.isLoading,
                         hasMoreReviews: _hasMoreReviews,
-                        onLoadMore: _hasMoreReviews ? () => _loadMoreReviews() : null,
+                        onLoadMore:
+                            _hasMoreReviews ? () => _loadMoreReviews() : null,
                       );
                     },
                   ),
@@ -252,12 +262,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
             ),
           ),
           Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-              ),
-            ),
+            child: Text(value, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -272,31 +277,29 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   }
 
   void _shareMovie() {
-    final shareText = 'Check out "${widget.movie.title}" on MovieDB!\n\n'
+    final shareText =
+        'Check out "${widget.movie.title}" on MovieDB!\n\n'
         'Rating: ${widget.movie.voteAverage.toStringAsFixed(1)}\n'
         'Release Date: ${_formatReleaseDate(widget.movie.releaseDate)}\n\n'
         '${widget.movie.overview}\n\n'
         'Shared from MovieDB App';
-    
-    Share.share(
-      shareText,
-      subject: 'Movie: ${widget.movie.title}',
-    );
+
+    Share.share(shareText, subject: 'Movie: ${widget.movie.title}');
   }
 
   void _loadMoreReviews() {
     _currentReviewPage++;
-    context.read<MovieProvider>().loadMovieReviews(
-      widget.movie.id,
-      page: _currentReviewPage,
-    ).then((_) {
-      // Check if we have more reviews to load
-      final movieProvider = context.read<MovieProvider>();
-      if (movieProvider.movieReviews.length < _currentReviewPage * 20) {
-        setState(() {
-          _hasMoreReviews = false;
+    context
+        .read<MovieProvider>()
+        .loadMovieReviews(widget.movie.id, page: _currentReviewPage)
+        .then((_) {
+          // Check if we have more reviews to load
+          final movieProvider = context.read<MovieProvider>();
+          if (movieProvider.movieReviews.length < _currentReviewPage * 20) {
+            setState(() {
+              _hasMoreReviews = false;
+            });
+          }
         });
-      }
-    });
   }
-} 
+}

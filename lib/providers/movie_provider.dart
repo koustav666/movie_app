@@ -155,10 +155,20 @@ class MovieProvider with ChangeNotifier {
       _error = 'Failed to toggle bookmark: $e';
     }
   }
-
+  Movie? getMovieById(int movieId) {
+    final lists = [_nowPlayingMovies, _popularMovies, _topRatedMovies, _upcomingMovies, _searchResults, _bookmarkedMovies];
+    for (final list in lists) {
+      final index = list.indexWhere((m) => m.id == movieId);
+      if (index != -1) {
+        return list[index]; 
+      }
+    }
+    return null;
+  }
   // Update bookmark status in all movie lists
   void _updateMovieBookmarkStatus(int movieId) {
     // Update in now playing movies
+
     final nowPlayingIndex = _nowPlayingMovies.indexWhere((m) => m.id == movieId);
     if (nowPlayingIndex != -1) {
       final movie = _nowPlayingMovies[nowPlayingIndex];
